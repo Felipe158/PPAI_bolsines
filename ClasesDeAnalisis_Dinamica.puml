@@ -1,0 +1,33 @@
+@startuml
+
+autonumber
+
+actor Empleado
+
+boundary Pantalla
+control GestorBolsin
+entity Bolsin
+entity Remito
+
+Empleado -> Pantalla : crearBolsin()
+Pantalla -> GestorBolsin : crear()
+
+activate GestorBolsin
+
+loop remitos seleccionados
+    GestorBolsin -> Remito : validar()
+end
+
+GestorBolsin -> Bolsin : create()
+GestorBolsin -> Bolsin : asociarRemitos()
+
+alt datos válidos
+    Bolsin --> GestorBolsin : bolsinCreado
+    GestorBolsin --> Pantalla : mostrarConfirmacion()
+else error
+    GestorBolsin --> Pantalla : mostrarError()
+end
+
+deactivate GestorBolsin
+
+@enduml

@@ -1,0 +1,197 @@
+# Modelo de Dominio en PlantUML
+
+```plantuml
+@startuml
+skinparam classAttributeIconSize 0
+hide empty methods
+hide circle
+
+class Provincia {
+  descripcion
+  nombre
+}
+
+class Localidad {
+  descripcion
+  nombre
+}
+
+class Empleado {
+  apellido
+  email
+  nombre
+
+  esTuCM()
+  getCM()
+  getEmail()
+  mostrarCM()
+  sosGCM()
+}
+
+class Rol {
+  descripcion
+  nombre
+
+  esGCM()
+}
+
+class TipoDocumento {
+  descripcion
+  nombre
+
+  getDescripcion()
+  getNombre()
+  new()
+  setDescripcion()
+  setNombre()
+}
+
+class Archivo {
+  nombreArchivo
+  tituloDocumento
+}
+
+class ComisionMedica {
+  codigo
+  direccion
+  email
+  nombre
+  telefono
+
+  getNombre()
+}
+
+class Documento {
+  asunto
+  fechaPase
+  numero
+
+  aceptar()
+  crearCE()
+  getAsunto()
+  getDatosDocumentacion()
+  mostrarTipoDocumentacion()
+  new()
+  remitar()
+  setEstado()
+}
+
+class Estado {
+  ambito
+  descripcion
+  nombre
+
+  esAmbitoBolsin()
+  esAmbitoDocumentacion()
+  esAmbitoRemito()
+  esEnviado()
+  esRecibidaYAceptada()
+  esRecibidoEnCMDestino()
+  esRecibidoYAceptado()
+  getAmbito()
+  getDescripcion()
+  getNombre()
+  new()
+  setAmbito()
+  setDescripcion()
+  setNombre()
+}
+
+class CambioEstadoDocumentacion {
+  fechaHoraFin
+  fechaHoraInicio
+
+  new()
+  setFechaHoraFin()
+  sosActual()
+}
+
+class DetalleRemito {
+  areaCMDestino
+
+  aceptarDocumentacion()
+  actualizarEstadoDoc()
+  getDocumentacion()
+  mostrarDocumentacion()
+}
+
+class Remito {
+  fecha
+  numero
+
+  actualizarEstadoDoc()
+  buscarDocumentacion()
+  estasGenerado()
+  getDatosRemito()
+  getNumero()
+  modificarDocumentacionIncluida()
+  mostrarInformacionRemito()
+  new()
+  setEstado()
+  setEstado()
+  tenesEstaCMDestino()
+  tenesEstaCMOrigen()
+  tomarDocumentacion()
+}
+
+class Bolsin {
+  fecha
+  numeroBolsin
+  numeroPrecinto
+  peso
+
+  asociarRemito()
+  crearCEBolsin()
+  esTuCMOrigen()
+  getNroPrecinto()
+  getNumeroBolsin()
+  mostrarDatos()
+  new()
+  obtenerCMDestino()
+  obtenerInformacionRemito()
+  setDetalleBolsin()
+  sosEnviado()
+}
+
+class CambioEstadoBolsin {
+  fechaHoraFin
+  fechaHoraInicio
+
+  new()
+  setFechaHoraFin()
+  sosActual()
+  sosEnviado()
+}
+
+Provincia "1" <-- "*" Localidad : provincia
+Localidad "1" <-- "*" ComisionMedica : localidad
+
+Empleado "1" --> "1" Rol : rol
+Empleado "1" --> "1" ComisionMedica : asignadoA
+
+Documento "1" --> "1" TipoDocumento : tipoDocumento
+Documento "1" --> "1..*" Archivo : archivoAdjunto
+Documento "*" --> "1" ComisionMedica : cmOrigen
+Documento "1" --> "1..*" CambioEstadoDocumentacion : cambioEstado
+
+
+CambioEstadoDocumentacion "1..*" --> "1" Estado : cambioEstado
+CambioEstadoDocumentacion "*" --> "1" Empleado : responsableCE
+
+DetalleRemito "1" --> "1" Documento : documentacion
+
+Remito "1" --> "1" Estado : estado
+Remito "1" o-- "1..*" DetalleRemito : detalleRemito
+Remito "*" --> "1" ComisionMedica : origen
+Remito "*" --> "1" ComisionMedica : destino
+
+Bolsin "1" o-- "1..*" Remito : remito
+Bolsin "*" --> "1" ComisionMedica : origen
+Bolsin "*" --> "1" ComisionMedica : destino
+Bolsin "1" --> "1..*" CambioEstadoBolsin : cambioEstado
+
+CambioEstadoBolsin "*" --> "1" Estado : estado
+CambioEstadoBolsin "*" --> "1" Empleado : responsableCE
+
+@enduml
+```
