@@ -1,0 +1,201 @@
+@startuml
+skinparam classAttributeIconSize 0
+hide empty methods
+hide circle
+
+' =========================
+' ENTIDADES
+' =========================
+
+class Provincia {
+  descripcion
+  nombre
+}
+
+class Localidad {
+  descripcion
+  nombre
+}
+
+class Usuario {
+  username
+  password
+
+  esValido()
+}
+
+class Sesion {
+  fechaHoraInicio
+
+  obtenerUsuario()
+  obtenerEmpleado()
+}
+
+class Empleado {
+  apellido
+  email
+  nombre
+
+  esTuCM()
+  getCM()
+  getEmail()
+  mostrarCM()
+  sosGCM()
+}
+
+class Rol {
+  descripcion
+  nombre
+
+  esGCM()
+}
+
+class TipoDocumento {
+  descripcion
+  nombre
+}
+
+class Archivo {
+  nombreArchivo
+  tituloDocumento
+}
+
+class ComisionMedica {
+  codigo
+  direccion
+  email
+  nombre
+  telefono
+
+  getNombre()
+}
+
+class Documento {
+  asunto
+  fechaPase
+  numero
+
+  aceptar()
+  crearCE()
+  setEstado()
+}
+
+class Estado {
+  ambito
+  descripcion
+  nombre
+
+  esEnviado()
+  esRecibidaYAceptada()
+  esRecibidoEnCMDestino()
+  esRecibidoYAceptado()
+}
+
+class CambioEstadoDocumentacion {
+  fechaHoraFin
+  fechaHoraInicio
+
+  sosActual()
+}
+
+class DetalleRemito {
+  areaCMDestino
+
+  aceptarDocumentacion()
+  actualizarEstadoDoc()
+}
+
+class Remito {
+  fecha
+  numero
+
+  actualizarEstadoDoc()
+  getNumero()
+  setEstado()
+}
+
+class Bolsin {
+  fecha
+  numeroBolsin
+  numeroPrecinto
+  peso
+
+  asociarRemito()
+  crearCEBolsin()
+  getNroPrecinto()
+  getNumeroBolsin()
+  sosEnviado()
+}
+
+class CambioEstadoBolsin {
+  fechaHoraFin
+  fechaHoraInicio
+
+  sosActual()
+  sosEnviado()
+}
+
+' =========================
+' CLASES DE FRONTERA Y CONTROL
+' =========================
+
+boundary PantallaRegistrarRecepcionBolsin {
+  solicitarDatos()
+  mostrarBolsines()
+  mostrarDetalle()
+  solicitarOpcionRecepcion()
+  mostrarConfirmacion()
+  informarExito()
+}
+
+control GestorRegistrarRecepcionBolsin {
+  buscarBolsines()
+  obtenerDetalle()
+  registrarRecepcion()
+  actualizarEstados()
+  notificarCMOrigen()
+}
+
+' =========================
+' RELACIONES
+' =========================
+
+Provincia "1" <-- "*" Localidad
+Localidad "1" <-- "*" ComisionMedica
+
+Usuario "1" --> "1" Empleado
+Sesion "1" --> "1" Usuario
+
+Empleado "1" --> "1" Rol
+Empleado "1" --> "1" ComisionMedica
+
+Documento "1" --> "1" TipoDocumento
+Documento "1" *-- "1..*" Archivo
+Documento "*" --> "1" ComisionMedica
+Documento "1" *-- "1..*" CambioEstadoDocumentacion
+
+CambioEstadoDocumentacion "*" --> "1" Estado
+CambioEstadoDocumentacion "*" --> "1" Empleado
+
+DetalleRemito "1" --> "1" Documento
+
+Remito "1" --> "1" Estado
+Remito "1" *-- "1..*" DetalleRemito
+Remito "*" --> "1" ComisionMedica : origen
+Remito "*" --> "1" ComisionMedica : destino
+
+Bolsin "1" *-- "1..*" Remito
+Bolsin "*" --> "1" ComisionMedica : origen
+Bolsin "*" --> "1" ComisionMedica : destino
+Bolsin "1" *-- "1..*" CambioEstadoBolsin
+
+CambioEstadoBolsin "*" --> "1" Estado
+CambioEstadoBolsin "*" --> "1" Empleado
+
+PantallaRegistrarRecepcionBolsin --> GestorRegistrarRecepcionBolsin
+GestorRegistrarRecepcionBolsin --> Sesion
+GestorRegistrarRecepcionBolsin --> Bolsin
+GestorRegistrarRecepcionBolsin --> Remito
+GestorRegistrarRecepcionBolsin --> Documento
+
+@enduml
