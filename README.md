@@ -4,3 +4,4 @@
 ![Diagrama2](ClasesDeAnalisis_Dinamica.png)
 
 
+![Diagrama2](ClasesDeAnalisis_Estatica.png)
