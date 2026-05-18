@@ -2,32 +2,113 @@
 
 autonumber
 
-actor Empleado
+actor "Encargado de Bolsines" as EB
 
-boundary Pantalla
-control GestorBolsin
+boundary PantallaRegistrarRecepcionBolsin as Pantalla
+control GestorRegistrarRecepcionBolsin as Gestor
+
+entity Sesion
+entity Empleado
+entity ComisionMedica
 entity Bolsin
 entity Remito
+entity Documento
+entity Estado
 
-Empleado -> Pantalla : crearBolsin()
-Pantalla -> GestorBolsin : crear()
+' ==========================================
+' Inicio CU
+' ==========================================
 
-activate GestorBolsin
+EB -> Pantalla : seleccionarRegistrarRecepcion()
 
-loop remitos seleccionados
-    GestorBolsin -> Remito : validar()
+Pantalla -> Gestor : iniciarCU()
+
+activate Gestor
+
+' ==========================================
+' Obtener CM del usuario
+' ==========================================
+
+Gestor -> Sesion : obtenerUsuario()
+Sesion --> Gestor : usuario
+
+Gestor -> Sesion : obtenerEmpleado()
+Sesion --> Gestor : empleado
+
+Gestor -> Empleado : getCM()
+Empleado --> Gestor : cmUsuario
+
+' ==========================================
+' Buscar bolsines enviados
+' ==========================================
+
+Gestor -> Bolsin : buscarEnviados(cmUsuario)
+Bolsin --> Gestor : listaBolsines
+
+Gestor --> Pantalla : mostrarBolsines(listaBolsines)
+
+' ==========================================
+' Selección de bolsín
+' ==========================================
+
+EB -> Pantalla : seleccionarBolsin()
+
+Pantalla -> Gestor : tomarSeleccion(bolsin)
+
+Gestor -> Bolsin : obtenerInformacionRemito()
+Bolsin --> Gestor : remitos
+
+loop por cada remito
+    Gestor -> Remito : obtenerDetalle()
+    Remito --> Gestor : detalle
+
+    loop por cada documento
+        Gestor -> Documento : getDatosDocumentacion()
+        Documento --> Gestor : datosDoc
+    end
 end
 
-GestorBolsin -> Bolsin : create()
-GestorBolsin -> Bolsin : asociarRemitos()
+Gestor --> Pantalla : mostrarDetalle()
 
-alt datos válidos
-    Bolsin --> GestorBolsin : bolsinCreado
-    GestorBolsin --> Pantalla : mostrarConfirmacion()
-else error
-    GestorBolsin --> Pantalla : mostrarError()
+' ==========================================
+' Selección opción recepción
+' ==========================================
+
+Pantalla --> EB : solicitarOpcionRecepcion()
+
+EB -> Pantalla : opcionRecepcion()
+
+Pantalla -> Gestor : registrarRecepcion(opcion)
+
+Gestor --> Pantalla : solicitarConfirmacion()
+
+EB -> Pantalla : confirmar()
+
+Pantalla -> Gestor : confirmarOperacion()
+
+' ==========================================
+' Actualización de estados
+' ==========================================
+
+loop por cada remito
+    Gestor -> Remito : setEstado(Recibido y Aceptado)
+
+    loop por cada documento
+        Gestor -> Documento : setEstado(Recibida y Aceptada)
+    end
 end
 
-deactivate GestorBolsin
+Gestor -> Bolsin : crearCEBolsin()
+Gestor -> Bolsin : setEstado(Recibido en CM destino)
+
+' ==========================================
+' Notificación
+' ==========================================
+
+Gestor -> ComisionMedica : notificarRecepcion()
+
+Gestor --> Pantalla : informarExito()
+
+deactivate Gestor
 
 @enduml
