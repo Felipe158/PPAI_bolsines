@@ -19,7 +19,7 @@ entity Estado
 ' Inicio CU
 ' ==========================================
 
-EB -> Pantalla : seleccionarRegistrarRecepcion()
+EB ->> Pantalla : seleccionarRegistrarRecepcion()
 
 Pantalla -> Gestor : iniciarCU()
 
@@ -28,6 +28,7 @@ activate Gestor
 ' ==========================================
 ' Obtener CM del usuario
 ' ==========================================
+Gestor -> Gestor : obtenerUsuario()
 
 Gestor -> Sesion : obtenerUsuario()
 Sesion --> Gestor : usuario
