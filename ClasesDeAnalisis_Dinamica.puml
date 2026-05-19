@@ -7,37 +7,46 @@ actor "Encargado de Bolsines" as EB
 boundary PantallaRegistrarRecepcionBolsin as Pantalla
 control GestorRegistrarRecepcionBolsin as Gestor
 
-entity Sesion
-entity Empleado
+entity "activa : Sesion" as Sesion
+entity Usuario
+entity "logueado : Empleado" as Empleado
 entity ComisionMedica
 entity Bolsin
 entity Remito
 entity Documento
 entity Estado
+entity CambioEstadoBolsin
+entity CambioEstadoDocumentacion
+entity DetalleRemito
+entity TipoDocumento
 
 ' ==========================================
 ' Inicio CU
 ' ==========================================
 
-EB ->> Pantalla : seleccionarRegistrarRecepcion()
+create Pantalla
 
-Pantalla -> Gestor : iniciarCU()
+EB ->> Pantalla : seleccionarRegistrarRecepcionDeBolsin()
+
+Pantalla --> Pantalla : habilitarPantalla()
+
+create Gestor
+
+Pantalla ->> Gestor : RegistrarRecepcionDeBolsin()
 
 activate Gestor
 
 ' ==========================================
 ' Obtener CM del usuario
 ' ==========================================
+Gestor -> Gestor : buscarCM()
 Gestor -> Gestor : obtenerUsuario()
 
 Gestor -> Sesion : obtenerUsuario()
-Sesion --> Gestor : usuario
 
-Gestor -> Sesion : obtenerEmpleado()
-Sesion --> Gestor : empleado
+Sesion -> Usuario : obtenerEmpleado()
 
 Gestor -> Empleado : getCM()
-Empleado --> Gestor : cmUsuario
 
 ' ==========================================
 ' Buscar bolsines enviados

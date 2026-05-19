@@ -1,5 +1,10 @@
 @startuml
+
 skinparam classAttributeIconSize 0
+skinparam class {
+  BackgroundColor White
+  BorderColor Black
+}
 
 hide empty methods
 hide circle
@@ -164,7 +169,6 @@ class GestorRegistrarRecepcionBolsin <<control>> {
 Provincia "1" <-- "*" Localidad
 Localidad "1" <-- "*" ComisionMedica
 
-Usuario "1" ..> "1" Empleado
 Sesion "1" --> "1" Usuario
 
 Empleado "1" --> "1" Rol
@@ -199,5 +203,6 @@ GestorRegistrarRecepcionBolsin ..> Sesion
 GestorRegistrarRecepcionBolsin ..> Bolsin
 GestorRegistrarRecepcionBolsin ..> Remito
 GestorRegistrarRecepcionBolsin ..> Documento
+GestorRegistrarRecepcionBolsin ..> Empleado
 
 @enduml
