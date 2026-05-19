@@ -1,0 +1,12 @@
+@startuml
+
+actor Usuario
+'control Gestor
+control "gestor : GestorRegistrarRecepcionBolsin" as gestor
+
+Usuario -> Gestor : generarPedido()
+create "pedido : Pedido" as pedido
+
+Gestor -> pedido : create()
+
+@enduml

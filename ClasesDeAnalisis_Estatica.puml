@@ -131,6 +131,7 @@ class Bolsin {
   getNroPrecinto()
   getNumeroBolsin()
   sosEnviado()
+  obtenerCMDestino()
 }
 
 class CambioEstadoBolsin {
@@ -170,6 +171,7 @@ Provincia "1" <-- "*" Localidad
 Localidad "1" <-- "*" ComisionMedica
 
 Sesion "1" --> "1" Usuario
+Usuario ..> Empleado
 
 Empleado "1" --> "1" Rol
 Empleado "1" --> "1" Usuario

@@ -12,11 +12,13 @@ entity Usuario
 entity "logueado : Empleado" as Empleado
 entity ComisionMedica
 entity Bolsin
+entity "seleccionado : Bolsin" as BolsinSeleccionado 
 entity Remito
 entity Documento
 entity Estado
 entity CambioEstadoBolsin
-entity CambioEstadoDocumentacion
+entity "actual : CambioEstadoBolsin" as CambioEstadoBolsinActual
+entity "actual : CambioEstadoDocumentacion" as CambioEstadoDocumentacionActual
 entity DetalleRemito
 entity TipoDocumento
 
@@ -32,7 +34,7 @@ Pantalla --> Pantalla : habilitarPantalla()
 
 create Gestor
 
-Pantalla ->> Gestor : RegistrarRecepcionDeBolsin()
+Pantalla --> Gestor : RegistrarRecepcionDeBolsin()
 
 activate Gestor
 
@@ -48,51 +50,79 @@ Sesion -> Usuario : obtenerEmpleado()
 
 Gestor -> Empleado : getCM()
 
+Gestor -> Pantalla : mostrarCM()
+
 ' ==========================================
 ' Buscar bolsines enviados
 ' ==========================================
 
-Gestor -> Bolsin : buscarEnviados(cmUsuario)
-Bolsin --> Gestor : listaBolsines
+Gestor -> Gestor : buscarEnviados(cmUsuario)
 
-Gestor --> Pantalla : mostrarBolsines(listaBolsines)
+
+loop por cada bolsin
+    Gestor -> Bolsin : obtenerCMDestino()
+    
+    loop por cada bolsin con CM == CMDestino
+        Gestor -> Bolsin : sosEnviado()
+        Bolsin -> CambioEstadoBolsin : sosActual()
+        CambioEstadoBolsin -> Estado : esAmbitoBolsin()
+        CambioEstadoBolsin -> Estado : esEnviado()
+        Gestor -> Bolsin : getNroPrecinto()
+        
+        Gestor -> Gestor : obtenerCMOrigen()
+
+        loop por cada Comision Medica
+            Gestor -> ComisionMedica : getNombre()
+            Gestor -> Bolsin : esTuCMOrigen()
+            
+        end
+    end
+end
+
+
+Gestor -> Pantalla : mostrarBolsines(listaBolsines)
 
 ' ==========================================
 ' Selección de bolsín
 ' ==========================================
 
-EB -> Pantalla : seleccionarBolsin()
+Gestor -> Pantalla : seleccionarBolsin()
+EB -> Pantalla : tomarSeleccion()
 
 Pantalla -> Gestor : tomarSeleccion(bolsin)
 
-Gestor -> Bolsin : obtenerInformacionRemito()
-Bolsin --> Gestor : remitos
+Gestor -> Gestor : obtenerRemitos()
 
 loop por cada remito
-    Gestor -> Remito : obtenerDetalle()
-    Remito --> Gestor : detalle
+    Gestor -> BolsinSeleccionado : obtenerInformacionRemito()
+    BolsinSeleccionado -> Remito : obtenerNroRemito()
+    BolsinSeleccionado -> Remito : buscarDocumentacion()
+    
 
     loop por cada documento
-        Gestor -> Documento : getDatosDocumentacion()
-        Documento --> Gestor : datosDoc
+        Remito -> DetalleRemito : getDocumentacion()
+        DetalleRemito -> Documento : getAsunto()
+        Documento -> TipoDocumento : getNombre()
     end
 end
 
-Gestor --> Pantalla : mostrarDetalle()
+Gestor -> Pantalla : mostrarNroRemito()
+Gestor -> Pantalla : mostrarAsunto()
+Gestor -> Pantalla : mostrarTipoDocumentacion()
 
 ' ==========================================
 ' Selección opción recepción
 ' ==========================================
 
-Pantalla --> EB : solicitarOpcionRecepcion()
+Gestor -> Pantalla : mostrarOpcionesRecepcion()
 
-EB -> Pantalla : opcionRecepcion()
+EB -> Pantalla : tomarOpcionRecepcion()
 
-Pantalla -> Gestor : registrarRecepcion(opcion)
+Pantalla -> Gestor : tomarOpcionRecepcion()
 
 Gestor --> Pantalla : solicitarConfirmacion()
 
-EB -> Pantalla : confirmar()
+EB -> Pantalla : tomarConfirmacion()
 
 Pantalla -> Gestor : confirmarOperacion()
 
@@ -100,16 +130,48 @@ Pantalla -> Gestor : confirmarOperacion()
 ' Actualización de estados
 ' ==========================================
 
+Gestor -> Gestor : actualizarEstados()
+Gestor -> Gestor : obtenerFechaYHoraActual()
+Gestor -> Sesion : obtenerUsuario()
+Sesion -> Usuario : obtenerEmpleado()
+loop por cada Estado
+    Gestor -> Estado : esAmbitoBolsin()
+    Gestor -> Estado : esRecibidoEnCMDestino()
+
+end
+loop por cada Estado
+    Gestor -> Estado : esAmbitoRemito()
+    Gestor -> Estado : esRecibidoYAceptado()
+
+end
+loop por cada Estado
+    Gestor -> Estado : esAmbitoDocumentacion()
+    Gestor -> Estado : esRecibidaYAceptada()
+
+end
+
+Gestor -> BolsinSeleccionado : actualizarEstadoBolsin()
+BolsinSeleccionado -> CambioEstadoBolsinActual : setFechaYHoraFin()
+
+BolsinSeleccionado -> BolsinSeleccionado : crearCEBolsin()
+create CambioEstadoBolsin
+BolsinSeleccionado --> CambioEstadoBolsin : new()
+
+
 loop por cada remito
-    Gestor -> Remito : setEstado(Recibido y Aceptado)
+    BolsinSeleccionado -> Remito : setEstado(Recibido y Aceptado)
+    Remito -> DetalleRemito : actualizarEstadoDoc()
 
     loop por cada documento
-        Gestor -> Documento : setEstado(Recibida y Aceptada)
+        DetalleRemito -> Documento : setEstado(Recibida y Aceptada)
+        Documento -> CambioEstadoDocumentacionActual : setFechaHoraFin()
+        
+        create CambioEstadoDocumentacion
+        Documento --> CambioEstadoDocumentacion : new()
+
     end
 end
 
-Gestor -> Bolsin : crearCEBolsin()
-Gestor -> Bolsin : setEstado(Recibido en CM destino)
 
 ' ==========================================
 ' Notificación
