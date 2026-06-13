@@ -1,0 +1,145 @@
+@startuml
+
+class Cliente {
+    idCliente
+    nombre
+    apellido
+    documento
+    email
+    telefono
+}
+
+class Prestamo {
+    idPrestamo
+    fechaSolicitud
+    fechaAprobacion
+    fechaAcreditacion
+    montoSolicitado
+    tasaInteres
+    cantidadCuotas
+    estado
+}
+
+enum EstadoPrestamo {
+    SOLICITADO
+    EN_EVALUACION
+    APROBADO
+    RECHAZADO
+    ACREDITADO
+    EN_MORA
+    REFINANCIADO
+    CANCELADO
+}
+
+class TipoPrestamo {
+    idTipoPrestamo
+    nombre
+    descripcion
+    plazoMaximo
+    tasaBase
+}
+
+abstract class DefinicionMora {
+    calcularRecargo()
+}
+
+class MoraPorcentajeDiario {
+    porcentajeDiario
+}
+
+class MoraMontoFijoDiario {
+    montoFijoPorDia
+}
+
+class Cuota {
+    numero
+    fechaVencimiento
+    montoOriginal
+    saldoPendiente
+    diasAtraso
+    estado
+}
+
+enum EstadoCuota {
+    PENDIENTE
+    PAGADA
+    VENCIDA
+    PARCIAL
+    CONDONADA
+}
+
+class Recargo {
+    fechaCalculo
+    monto
+    diasAtraso
+}
+
+class Pago {
+    idPago
+    fechaHora
+    montoPagado
+}
+
+abstract class MedioPago
+
+class TransferenciaBancaria
+class TarjetaCredito
+class TarjetaDebito
+
+class PlanPago {
+    idPlan
+    fechaCreacion
+    montoTotalAcordado
+    porcentajeCondonacion
+    estado
+}
+
+enum EstadoPlanPago {
+    PROPUESTO
+    ACEPTADO
+    INCUMPLIDO
+    CANCELADO
+}
+
+class DetallePlanPago {
+    fechaLimitePago
+    montoAcordado
+}
+
+class EvaluacionCrediticia {
+    fecha
+    resultado
+    observaciones
+}
+
+Cliente "1" -- "0..*" Prestamo
+
+Prestamo "1" -- "1" TipoPrestamo
+Prestamo "1" -- "1..*" Cuota
+Prestamo "1" -- "0..*" PlanPago
+Prestamo "1" -- "0..1" EvaluacionCrediticia
+
+Prestamo --> EstadoPrestamo
+
+TipoPrestamo "1" -- "1" DefinicionMora
+
+DefinicionMora <|-- MoraPorcentajeDiario
+DefinicionMora <|-- MoraMontoFijoDiario
+
+Cuota "1" -- "0..*" Pago
+Cuota "1" -- "0..*" Recargo
+
+Cuota --> EstadoCuota
+
+Pago "1" -- "1" MedioPago
+
+MedioPago <|-- TransferenciaBancaria
+MedioPago <|-- TarjetaCredito
+MedioPago <|-- TarjetaDebito
+
+PlanPago "1" -- "1..*" DetallePlanPago
+DetallePlanPago "*" -- "1..*" Cuota
+
+PlanPago --> EstadoPlanPago
+
+@enduml

@@ -5,3 +5,5 @@
 
 
 ![Diagrama2](ClasesDeAnalisis_Estatica.png)
+
+![Diagrama2](maquinaDeEstados_Documentacion.png)

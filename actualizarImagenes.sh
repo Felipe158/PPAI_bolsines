@@ -1,3 +1,4 @@
 plantuml ClasesDeAnalisis_Dinamica.puml
 plantuml ClasesDeAnalisis_Estatica.puml
 plantuml ClasesDeDominio.puml
+plantuml maquinaDeEstados_Documentacion.puml
