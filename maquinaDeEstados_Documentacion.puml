@@ -1,0 +1,51 @@
+@startuml
+
+hide empty description
+
+state "Registrada" as Registrada
+state "En remito" as EnRemito
+state "En bolsín saliente" as EnBolsinSaliente
+state "En bolsín enviado" as EnBolsinEnviado
+state "Recibida y aceptada" as RecibidaAceptada
+state "No recibida" as NoRecibida
+state "Dada de baja" as DadaDeBaja
+state "Recibida y rechazada" as RecibidaRechazada
+state "Para redirigir" as ParaRedirigir
+
+[*] --> Registrada : 7. Registrar documentación / new()
+
+Registrada --> EnRemito : 15. Generar remito / agregarARemito()
+
+EnRemito --> Registrada : 17. Cancelar remito / quitarDeRemito()
+
+EnRemito --> EnBolsinSaliente : 20. Modificar bolsín [remito agregado] / agregarABolsin()
+
+EnBolsinSaliente --> EnRemito : 20. Modificar bolsín [remito quitado] / quitarDeBolsin()
+
+EnBolsinSaliente --> EnRemito : 21. Eliminar bolsín / quitarDeBolsin()
+
+EnBolsinSaliente --> EnBolsinEnviado : 27. Registrar retiro de bolsín / enviar()
+
+EnBolsinEnviado --> RecibidaAceptada : 28. Registrar recepción de bolsín [documentación correcta] / aceptar()
+
+EnBolsinEnviado --> NoRecibida : 28. Registrar recepción de bolsín [documentación faltante] / marcarNoRecibida()
+
+EnBolsinEnviado --> RecibidaRechazada : 28. Registrar recepción de bolsín [no corresponde CM destino] / rechazar()
+
+EnBolsinEnviado --> ParaRedirigir : 28. Registrar recepción de bolsín [CM destino = CMC && requiere derivación] / marcarParaRedirigir()
+
+RecibidaRechazada --> Registrada : 31. Registrar revision de Documentacion / reenviar()
+
+NoRecibida --> Registrada : 31. Registrar revision de Documentacion [es relevante decide reenviar] / reenviar()
+
+NoRecibida --> DadaDeBaja : 31. Registrar revision de Documentacion [no es relevante decide dar de baja] / darDeBaja()
+
+ParaRedirigir --> RecibidaAceptada : 28. Registrar recepción de bolsín [documentación correcta] / aceptar()
+
+ParaRedirigir --> RecibidaRechazada : 28. Registrar recepción de bolsín [no corresponde al área] / rechazar()
+
+RecibidaAceptada --> [*]
+'RecibidaRechazada --> [*]
+DadaDeBaja --> [*]
+
+@enduml
