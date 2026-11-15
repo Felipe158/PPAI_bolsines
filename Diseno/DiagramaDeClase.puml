@@ -1,0 +1,399 @@
+
+@startuml
+
+scale max 3000*3000
+
+skinparam classAttributeIconSize 0
+hide empty methods
+hide circle
+
+title Diagrama de Clases - Recepción de Bolsín
+
+'========================================
+' CONFIGURACION VISUAL
+'========================================
+
+
+
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+skinparam dpi 180
+skinparam linetype ortho
+skinparam nodesep 45
+skinparam ranksep 55
+
+skinparam class {
+    BackgroundColor #F8FAFC
+    BorderColor #34495E
+    FontColor #17202A
+    FontName Arial
+    FontSize 12
+    ArrowColor #34495E
+}
+
+hide circle
+
+'========================================
+' CLASES DE USUARIO Y SESION
+'========================================
+
+class Sesion {
+    - fechaHoraFinSesion: DateTime
+    - fechaHoraInicioSesion: DateTime
+    --
+    + getFechaHoraFinSesion(): DateTime
+    + getFechaHoraInicioSesion(): DateTime
+    + getUsuario(): Usuario
+    + setFechaHoraFinSesion(): void
+    + setFechaHoraInicioSesion(): void
+}
+
+class Usuario {
+    - password: string
+    - user: string
+    --
+    + getUser(): string
+    + setPassword(): void
+    + setUser(): void
+}
+
+class Empleado {
+    - apellido: string
+    - nombre: string
+    --
+    + esTuUsuario(): Boolean
+    + getApellido(): string
+    + getCM(): ComisionMedica
+    + getNombre(): string
+    + getNombreEmpleado(): string
+    + getNombreRol(): string
+    + setApellido(): void
+    + setNombre(): void
+}
+
+'========================================
+' UBICACION GEOGRAFICA
+'========================================
+
+class Provincia {
+    - descripcion: string
+    - nombre: string
+    --
+    + getDescripcion(): string
+    + getNombre(): string
+    + setDescripcion(): void
+    + setNombre(): void
+}
+
+class Localidad {
+    - descripcion: string
+    - nombre: string
+    --
+    + getDescripcion(): string
+    + getNombre(): string
+    + setDescripcion(): void
+    + setNombre(): void
+}
+
+class ComisionMedica {
+    - codigo: int
+    - direccion: string
+    - email: string
+    - nombre: string
+    - telefono: string
+    --
+    + getCodigo(): int
+    + getDireccion(): string
+    + getEmail(): string
+    + getNombre(): string
+    + getTelefono(): string
+    + setCodigo(): void
+    + setDireccion(): void
+    + setEmail(): void
+    + setNombre(): void
+    + setTelefono(): void
+}
+
+'========================================
+' DOCUMENTACION
+'========================================
+
+class TipoDocumento {
+    - descripcion: string
+    - nombre: string
+    --
+    + getDescripcion(): string
+    + getNombre(): string
+    + new(): void
+    + setDescripcion(): void
+    + setNombre(): void
+}
+
+class Archivo {
+    - nombreArchivo: string
+    - tituloDocumento: string
+    --
+    + getNombreArchivo(): string
+    + getTituloDocumento(): string
+    + setNombreArchivo(): void
+    + setTituloDocumento(): void
+}
+
+class Documentacion {
+    - asunto: string
+    - fechaPase: DateTime
+    - numero: int
+    --
+    + crearCE(): void
+    + darDeBaja(): void
+    + getAsunto(): string
+    + getDatosDocumentacion(): void
+    + getEstado(): Estado
+    + getFechaPase(): DateTime
+    + getNumero(): int
+    + getTipoDocumento(): TipoDocumento
+    + marcarEnBolsinSaliente(): void
+    + marcarEnBolsinEnviado(): void
+    + marcarEnRemito(): void
+    + marcarParaRedirigir(): void
+    + marcarRecibidaAceptada(): void
+    + marcarRecibidaRechazada(): void
+    + marcarNoRecibida(): void
+    + reenviar(): void
+    + quitarDeBolsin(): void
+    + quitarDeRemito(): void
+    + registrar(): void
+    + remitar(): void
+    + setEstado(): void
+    + setFechaPase(): void
+    + setNumero(): void
+}
+
+class CambioEstadoDocumentacion {
+    - fechaHoraFin: DateTime
+    - fechaHoraInicio: DateTime
+    --
+    + getFechaHoraFin(): DateTime
+    + getFechaHoraInicio(): DateTime
+    + setFechaHoraFin(): void
+    + setFechaHoraInicio(): void
+    + sosActual(): Boolean
+}
+
+'========================================
+' ESTADOS
+'========================================
+
+class Estado {
+    - ambito: string
+    - descripcion: string
+    - nombre: string
+    --
+    + esAmbitoBolsin(): Boolean
+    + esAmbitoDocumentacion(): Boolean
+    + esAmbitoRemito(): Boolean
+    + esEnviado(): Boolean
+    + esRecibidaYAceptada(): Boolean
+    + esRecibidoEnCMDestino(): Boolean
+    + esRecibidoYAceptado(): Boolean
+    + esEstadoBolsin(): Boolean
+    + esEstadoDocumentacion(): Boolean
+    + esEstadoRemito(): Boolean
+    + getAmbito(): string
+    + getDescripcion(): string
+    + getNombre(): string
+    + new(): void
+    + setAmbito(): void
+    + setDescripcion(): void
+    + setNombre(): void
+}
+
+'========================================
+' REMITOS
+'========================================
+
+class Remito {
+    - fecha: DateTime
+    - numero: int
+    --
+    + actualizarEstadoDoc(): void
+    + buscarDocumentacion(): void
+    + estasGenerado(): Boolean
+    + getDatosDocumentacion(): string
+    + getDatosRemito(): void
+    + getFecha(): DateTime
+    + getNumero(): int
+    + modificarDocumentacionIncluida(): void
+    + new(): void
+    + recibirDocumentacion(): void
+    + setEstado(): void
+    + setFecha(): void
+    + setNumero(): void
+    + tenesEstaCMDestino(): Boolean
+    + tenesEstaCMOrigen(): Boolean
+    + tomarDocumentacion(): void
+}
+
+class DetalleDeRemito {
+    - areaCMDestino: int
+    --
+    + aceptarDocumentacion(): void
+    + actualizarEstadoDoc(): void
+    + getDocumentacion(): Documentacion
+    + setAreaCMDestino(): void
+}
+
+'========================================
+' BOLSINES
+'========================================
+
+class Bolsin {
+    - fecha: DateTime
+    - numeroBolsin: int
+    - numeroPrecinto: int
+    - peso: double
+    --
+    + asociarRemito(): void
+    + crearCEBolsin(): void
+    + esTuCMOrigen(): Boolean
+    + getNroPrecinto(): int
+    + getNumeroBolsin(): int
+    + mostrarDatos(): void
+    + new(): void
+    + obtenerCMDestino(): ComisionMedica
+    + obtenerInformacionRemito(): void
+    + setDetalleBolsin(): void
+    + setEstado(): void
+    + sosEnviado(): Boolean
+}
+
+class CambioEstadoBolsin {
+    - fechaHoraFin: DateTime
+    - fechaHoraInicio: DateTime
+    --
+    + getFechaHoraFin(): DateTime
+    + getFechaHoraInicio(): DateTime
+    + setFechaHoraFin(): void
+    + setFechaHoraInicio(): void
+    + sosActual(): Boolean
+    + sosEnviado(): Boolean
+}
+
+'========================================
+' GESTOR
+'========================================
+
+class GestorRecepcionBolsin {
+    - cambioEstadoBolsin: CambioEstadoBolsin
+    - cambioEstadoDocumentacion: CambioEstadoDocumentacion
+    - detalleRemito: DetalleDeRemito
+    - documentacion: Documentacion
+    - empleado: Empleado
+    - estado: Estado
+    - remito: Remito
+    - sesion: Sesion
+    - usuario: Usuario
+    --
+    + buscarBolsinesEnviados(): void
+    + buscarEstadoRecepcion(): void
+    + buscarEstadoDocumentacion(): void
+    + buscarEstadoBolsin(): void
+    + buscarRemitos(): void
+    + buscarDocumentacion(): void
+    + finCU(): void
+    + iniciarCU(): void
+    + getCM(): ComisionMedica
+    + getFechaActual(): DateTime
+    + iniciarCURegistrarRecepcionBolsin(): void
+    + recibirAceptarBolsin(): void
+    + recibirAceptarDocumentacion(): void
+    + recibirRechazarDocumentacion(): void
+    + recibirDerivarDocumentacion(): void
+    + tomarConfirmacion(): void
+    + tomarSeleccionOpcionRecepcion(): void
+}
+
+'========================================
+' INTERFAZ
+'========================================
+
+class InterfazPantallaRecepcionBolsin {
+    + buscarBolsines(): void
+    + iniciarCU(): void
+    + recibirSeleccion(): void
+    + recibirConfirmacion(): void
+    + mostrarBolsines(): void
+    + mostrarDetalle(): void
+    + mostrarOpcionesRecepcion(): void
+    + mostrarConfirmacion(): void
+    + mostrarResultado(): void
+    + tomarComunicacion(): void
+    + tomarSeleccion(): void
+    + tomarSeleccionOpcion(): void
+}
+
+'========================================
+' RELACIONES
+'========================================
+
+' Sesion y usuario
+
+Sesion "0..*" --> "1" Usuario : usuario
+Usuario "1" --> "1" Empleado : empleado
+
+' Ubicacion
+
+Provincia "1" <-- "0..*" Localidad : provincia
+Localidad "1" <-- "0..*" ComisionMedica : localidad
+
+' Empleado y comision medica
+
+Empleado "*" --> "1" ComisionMedica : asignadoA
+
+' Documentacion
+
+Documentacion "*" --> "1" TipoDocumento : tipoDocumento
+Documentacion "1" *-- "1..*" Archivo : archivoAdjunto
+Documentacion "*" --> "1" ComisionMedica : cmOrigen
+Documentacion "1" *-- "1..*" CambioEstadoDocumentacion : cambiosEstado
+
+CambioEstadoDocumentacion "*" --> "1" Estado : estado
+CambioEstadoDocumentacion "*" --> "1" Empleado : responsableCE
+
+' Remitos
+
+Remito "1" *-- "1..*" DetalleDeRemito : detalles
+DetalleDeRemito "*" --> "1" Documentacion : documentacion
+
+Remito "*" --> "1" Estado : estado
+Remito "*" --> "1" ComisionMedica : origen
+Remito "*" --> "1" ComisionMedica : destino
+
+' Bolsines
+
+Bolsin "1" o-- "1..*" Remito : remitos
+Bolsin "*" --> "1" ComisionMedica : origen
+Bolsin "*" --> "1" ComisionMedica : destino
+Bolsin "1" *-- "1..*" CambioEstadoBolsin : cambiosEstado
+
+CambioEstadoBolsin "*" --> "1" Estado : estado
+CambioEstadoBolsin "*" --> "1" Empleado : responsableCE
+
+' Gestor y entidades utilizadas
+
+GestorRecepcionBolsin ..> Sesion
+GestorRecepcionBolsin ..> Usuario
+GestorRecepcionBolsin ..> Empleado
+GestorRecepcionBolsin ..> Bolsin
+GestorRecepcionBolsin ..> Remito
+GestorRecepcionBolsin ..> DetalleDeRemito
+GestorRecepcionBolsin ..> Documentacion
+GestorRecepcionBolsin ..> Estado
+GestorRecepcionBolsin ..> CambioEstadoBolsin
+GestorRecepcionBolsin ..> CambioEstadoDocumentacion
+
+' Interfaz y gestor
+
+InterfazPantallaRecepcionBolsin ..> GestorRecepcionBolsin
+
+@enduml

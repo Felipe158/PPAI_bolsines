@@ -1,0 +1,94 @@
+
+@startuml
+title DRCU - Registrar recepción de bolsín (base UML 2.0)
+
+autonumber
+
+actor "encargado:Empleado" as actor
+
+boundary "pantalla:PantallaRecepcionBolsin" as pantalla
+control "gestor:GestorRecepcionBolsin" as gestor
+
+entity "actual:Sesion" as sesion
+entity "empleado:Empleado" as empleado
+entity "bolsin:Bolsin" as bolsin
+entity "remito:Remito" as remito
+entity "detalle:DetalleRemito" as detalle
+entity "documentacion:Documento" as documento
+entity "estado:Estado" as estado
+entity "ceBolsin:CambioEstadoBolsin" as ceBolsin
+entity "ceDoc:CambioEstadoDocumentacion" as ceDoc
+entity "cm:ComisionMedica" as cm
+
+actor -> pantalla : registrarRecepcionBolsin()
+pantalla -> gestor : iniciar()
+
+activate gestor
+
+gestor -> sesion : obtenerEmpleadoActual()
+sesion --> gestor : empleado
+
+gestor -> empleado : getCM()
+empleado --> gestor : cm
+
+gestor -> bolsin : buscarEnviados(cm)
+bolsin --> gestor : listaBolsines
+
+gestor --> pantalla : mostrarBolsines(lista)
+
+actor -> pantalla : seleccionarBolsin(id)
+pantalla -> gestor : tomarSeleccion(id)
+
+gestor -> bolsin : obtenerInformacionRemito()
+bolsin --> gestor : remitos
+
+loop por cada remito
+    gestor -> remito : obtenerDetalle()
+    remito --> gestor : detalle
+
+    loop por cada documentación
+        gestor -> detalle : getDocumentacion()
+        detalle --> gestor : documento
+        gestor -> documento : getDatosDocumentacion()
+        documento --> gestor : datos
+    end
+end
+
+gestor --> pantalla : mostrarDetalle()
+
+actor -> pantalla : confirmarRecepcion(opcion)
+pantalla -> gestor : registrarRecepcion(opcion)
+
+alt documentación correcta
+    create ceBolsin
+    gestor -> ceBolsin : create()
+    gestor -> estado : buscar("Recibido en CM destino")
+    estado --> gestor : estado
+    gestor -> bolsin : crearCEBolsin(estado,empleado)
+
+    loop por cada remito
+        gestor -> remito : actualizarEstado()
+
+        loop por cada documentación
+            create ceDoc
+            gestor -> ceDoc : create()
+            gestor -> estado : buscar("Recibida y aceptada")
+            estado --> gestor : estado
+            gestor -> documento : aceptar()
+        end
+    end
+
+    opt <<include>> CU29 Notificar recepción Bolsín
+        gestor -> cm : notificarRecepcion()
+    end
+
+    gestor --> pantalla : informarExito()
+
+else documentación rechazada
+    gestor -> documento : rechazar()
+    gestor --> pantalla : informarRechazo()
+end
+
+deactivate gestor
+
+@enduml
