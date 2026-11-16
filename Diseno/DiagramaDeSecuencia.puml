@@ -31,8 +31,9 @@ entity "remito:Remito" as Remito
 entity "detalle:DetalleDeRemito" as Detalle
 entity "documentacion:Documentacion" as Doc
 entity "tipoDocumento:TipoDocumento" as TipoDoc
-entity "ceDocumentacion:CambioEstadoDocumentacion" as CED
-
+entity ":CambioEstadoDocumentacion" as CambEstDoc
+entity "RecibidaYAceptada:CambioEstadoDocumentacion" as NuevoCED
+actor ":CU29"
 
 create Pantalla
 Responsable --> Pantalla : opcregistrarRecepcionBolsin()
@@ -170,43 +171,48 @@ Gestor -> Gestor : RecibirYAceptarRemitos()
 Gestor -> SeleccBolsin : RecibirYAceptarRemitos()
 
 
+
+
+Gestor -> Gestor : buscarEstadoRecibidaYAceptada()
+Gestor -> Estado : esAmbitoDocumentacion()
+Gestor -> Estado : esRecibidaYAceptada()
+
+Gestor -> Gestor : getFechaYHoraActual()
+Gestor -> Gestor :getEmpleadoLogueado()
+Gestor -> Empleado : getDatosEmpleado()
+
+Gestor -> Gestor : recibirYAceptarDoc()
+Gestor -> SeleccBolsin : recibirYAceptarDoc()
+
 ' Actualizar todos los remitos del bolsín
 loop Para todos los remitos del bolsín
-    SeleccBolsin -> Remito : recibirYAceptarRemito()
-
-    activate Remito
-
-    Remito -> Remito : setEstado(estadoRecibido)
+    SeleccBolsin -> Remito : actualizarEstadoDoc()
 
     ' Actualizar la documentación de cada remito
-    loop Para todos los detalles del remito
-        Remito -> Detalle : actualizarEstadoDoc()
-        Detalle -> Doc : aceptar()
+    Remito -> Detalle : actualizarEstadoDoc()
+    Detalle -> Doc : marcarRecibidaYAceptada()
 
-        activate Doc
+    activate Doc
+    Doc -> Doc : getEstadoActual()
 
-        Doc -> CED : sosActual()
-        CED --> Doc : cambioEstadoActual
 
-        Doc -> CED : setFechaHoraFin(fechaActual)
+    Doc -> CambEstDoc : sosActual()
+    'CambEstDoc --> Doc : cambioEstadoActual
 
-        create CED
-        Doc -> CED : new()
+    Doc -> CambEstDoc : setFechaHoraFin(fechaActual)
 
-        Doc -> Estado : buscarEstadoRecibidaYAceptada()
-        Estado --> Doc : estadoRecibidaAceptada
+    create NuevoCED
+    Doc -> NuevoCED : new()
 
-        Doc -> CED : setEstado(estadoRecibidaAceptada)
-        Doc -> CED : setResponsableCE(empleado)
+    'Estado --> Doc : estadoRecibidaAceptada
 
-        Doc --> Detalle : documentación actualizada
+    'Doc --> Detalle : documentación actualizada
 
-        deactivate Doc
+    deactivate Doc
 
-        Detalle --> Remito : documentación actualizada
-    end
+    'Detalle --> Remito : documentación actualizada
 
-    Remito --> Bolsin : remito actualizado
+    'Remito --> Bolsin : remito actualizado
 
     deactivate Remito
 end
@@ -215,9 +221,9 @@ deactivate Bolsin
 
 ' Caso de uso incluido
 Gestor -> Gestor : llamarACUNotificarRecepcionBolsin()
-Gestor -> Actor : <<include>> CU29 Notificar recepción Bolsín
+Gestor -> CU29 : <<include>> CU29 Notificar recepción Bolsín
 
-Gestor --> Pantalla : mostrarNotificacionExito()
+Gestor -> Pantalla : mostrarNotificacionExito()
 Gestor -> Gestor : finCU()
 
 deactivate Gestor
