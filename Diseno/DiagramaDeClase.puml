@@ -391,6 +391,7 @@ GestorRecepcionBolsin ..> Documentacion
 GestorRecepcionBolsin ..> Estado
 GestorRecepcionBolsin ..> CambioEstadoBolsin
 GestorRecepcionBolsin ..> CambioEstadoDocumentacion
+GestorRecepcionBolsin ..> ComisionMedica
 
 ' Interfaz y gestor
 
