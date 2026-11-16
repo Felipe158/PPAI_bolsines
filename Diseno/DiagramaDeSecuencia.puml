@@ -58,21 +58,21 @@ Gestor -> Gestor : buscarBolsinesEnviados()
 
 loop Para todos los bolsines encontrados
     Gestor -> Bolsin : esTuCMDestino(cm)
-    Bolsin --> Gestor : resultado
+    'Bolsin --> Gestor : resultado
 
     Gestor -> Bolsin : sosEnviado()
     Bolsin -> Bolsin : obtenerEstadoActual()
     Bolsin -> CEB : sosActual()
     CEB --> Bolsin : cambioActual
     Bolsin -> Estado : sosEnviado()
-    Estado --> Bolsin : resultado
-    Bolsin --> Gestor : resultado
+    'Estado --> Bolsin : resultado
+    'Bolsin --> Gestor : resultado
 
     Gestor -> Bolsin : getCMOrigen()
-    Bolsin --> Gestor : cmOrigen
+    'Bolsin --> Gestor : cmOrigen
 
     Gestor -> Bolsin : getNumeroPrecinto()
-    Bolsin --> Gestor : numeroPrecinto
+    'Bolsin --> Gestor : numeroPrecinto
 end
 
 Gestor --> Pantalla : mostrarListaBolsines()
@@ -83,27 +83,27 @@ Pantalla -> Gestor : tomarSeleccionBolsin()
 ' Buscar remitos y documentación del bolsín seleccionado
 Gestor -> Gestor : buscarRemitosBolsin()
 Gestor -> Bolsin : obtenerInformacionRemito()
-Bolsin --> Gestor : remitos
+'Bolsin --> Gestor : remitos
 
 loop Para todos los remitos del bolsín
     Gestor -> Remito : getNumero()
-    Remito --> Gestor : numeroRemito
+    'Remito --> Gestor : numeroRemito
 
     Gestor -> Remito : getDatosDocumentacion()
-    Remito --> Gestor : detalles
+    'Remito --> Gestor : detalles
 
     loop Para todos los detalles del remito
         Gestor -> Detalle : getDocumentacion()
-        Detalle --> Gestor : documentacion
+        'Detalle --> Gestor : documentacion
 
         Gestor -> Doc : getAsunto()
-        Doc --> Gestor : asunto
+        'Doc --> Gestor : asunto
 
         Gestor -> Doc : getTipoDocumento()
-        Doc --> Gestor : tipoDocumento
+        'Doc --> Gestor : tipoDocumento
 
         Gestor -> TipoDoc : getNombre()
-        TipoDoc --> Gestor : nombreTipoDocumento
+        'TipoDoc --> Gestor : nombreTipoDocumento
     end
 end
 

@@ -338,27 +338,28 @@ class InterfazPantallaRecepcionBolsin {
 
 ' Sesion y usuario
 
-Sesion "0..*" --> "1" Usuario : usuario
-Usuario "1" --> "1" Empleado : empleado
+Sesion --> "1" Usuario : usuario
+
 
 ' Ubicacion
 
 Provincia "1" <-- "0..*" Localidad : provincia
 Localidad "1" <-- "0..*" ComisionMedica : localidad
 
-' Empleado y comision medica
+' Empleado 
 
-Empleado "*" --> "1" ComisionMedica : asignadoA
+Empleado --> "1" ComisionMedica : asignadoA
+Empleado --> "1" Usuario : usuario
 
 ' Documentacion
 
-Documentacion "*" --> "1" TipoDocumento : tipoDocumento
-Documentacion "1" *-- "1..*" Archivo : archivoAdjunto
-Documentacion "*" --> "1" ComisionMedica : cmOrigen
-Documentacion "1" *-- "1..*" CambioEstadoDocumentacion : cambiosEstado
+Documentacion --> "1" TipoDocumento : tipoDocumento
+Documentacion *-- "1..*" Archivo : archivoAdjunto
+Documentacion --> "1" ComisionMedica : cmOrigen
+Documentacion --> "1..*" CambioEstadoDocumentacion : cambiosEstado
 
-CambioEstadoDocumentacion "*" --> "1" Estado : estado
-CambioEstadoDocumentacion "*" --> "1" Empleado : responsableCE
+CambioEstadoDocumentacion --> "1" Estado : estado
+CambioEstadoDocumentacion --> "1" Empleado : responsableCE
 
 ' Remitos
 
@@ -366,23 +367,22 @@ Remito "1" *-- "1..*" DetalleDeRemito : detalles
 DetalleDeRemito "*" --> "1" Documentacion : documentacion
 
 Remito "*" --> "1" Estado : estado
-Remito "*" --> "1" ComisionMedica : origen
-Remito "*" --> "1" ComisionMedica : destino
+Remito --> "1" ComisionMedica : origen
+Remito --> "1" ComisionMedica : destino
 
 ' Bolsines
 
-Bolsin "1" o-- "1..*" Remito : remitos
-Bolsin "*" --> "1" ComisionMedica : origen
-Bolsin "*" --> "1" ComisionMedica : destino
+Bolsin "1" *-- "1..*" Remito : remitos
+Bolsin --> "1" ComisionMedica : origen
+Bolsin --> "1" ComisionMedica : destino
 Bolsin "1" *-- "1..*" CambioEstadoBolsin : cambiosEstado
 
 CambioEstadoBolsin "*" --> "1" Estado : estado
 CambioEstadoBolsin "*" --> "1" Empleado : responsableCE
 
-' Gestor y entidades utilizadas
+' Gestor y entidades utilizadas. DEPENDENCIAS
 
 GestorRecepcionBolsin ..> Sesion
-GestorRecepcionBolsin ..> Usuario
 GestorRecepcionBolsin ..> Empleado
 GestorRecepcionBolsin ..> Bolsin
 GestorRecepcionBolsin ..> Remito
