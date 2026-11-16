@@ -67,7 +67,7 @@ Gestor --> Pantalla : mostrarCM(nombreCM)
 ' Buscar bolsines enviados a la CM
 Gestor -> Gestor : buscarBolsinesEnviados()
 
-loop Para todos los bolsines encontrados
+loop Para todos los bolsines
     Gestor -> Bolsin : esTuCMDestino(cm)
     'Bolsin --> Gestor : resultado
 
@@ -133,7 +133,7 @@ Pantalla -> Gestor : tomarConfirmacion()
 
 ' Validar que el bolsín corresponde a la recepción
 Gestor -> Gestor : buscarEstadoRecibidoCMDestino()
-loop Buscar estado Recibido en CM Destino
+loop Para todos los estados. Buscar estado Bolsin Recibido en CM Destino
     Gestor -> Estado : esAmbitoBolsin()
     Gestor -> Estado : esRecibidoEnCMDestino()
 
@@ -147,78 +147,83 @@ Gestor -> Gestor : getEmpleadoLogueado()
 
 Gestor -> Empleado : getDatosEmpleado()
 'Empleado --> Gestor : datosEmpleado
+
 Gestor -> Gestor : recibirBolsinCMDestino()
 
-' Registrar recepción del bolsín
-Gestor -> SeleccBolsin : recibirBolsin()
+loop Para todos los remitos del bolsin
 
-activate SeleccBolsin
+    ' Registrar recepción del bolsín
+    Gestor -> SeleccBolsin : recibirBolsin()
 
-SeleccBolsin -> SeleccBolsin : obtenerEstadoActual()
-SeleccBolsin -> ActualCEBolsin : setFechaHoraFin()
-SeleccBolsin -> SeleccBolsin : crearCambioDeEstado()
+    activate SeleccBolsin
 
-create RecibidoEnCMDestino
-SeleccBolsin --> RecibidoEnCMDestino : new()
-Gestor -> Gestor : buscarEstadoRecibidoYAceptado()
-loop 
-    Gestor -> Estado : esAmbitoRemito()
-    Gestor -> Estado : esRecibidoYAceptado()
+    SeleccBolsin -> SeleccBolsin : obtenerEstadoActual()
+    SeleccBolsin -> ActualCEBolsin : setFechaHoraFin()
+    SeleccBolsin -> SeleccBolsin : crearCambioDeEstado()
 
+    create RecibidoEnCMDestino
+    SeleccBolsin --> RecibidoEnCMDestino : new()
+    Gestor -> Gestor : buscarEstadoRecibidoYAceptado()
+    loop Para todos los estados. Buscar estado Remito Recibido y Aceptado
+        Gestor -> Estado : esAmbitoRemito()
+        Gestor -> Estado : esRecibidoYAceptado()
+
+    end
+
+    Gestor -> Gestor : RecibirYAceptarRemitos()
+    Gestor -> SeleccBolsin : RecibirYAceptarRemitos()
+
+
+
+
+    Gestor -> Gestor : buscarEstadoRecibidaYAceptada()
+    loop Para todos los estados. Buscar estado Documentacion Recibida y Aceptada
+    Gestor -> Estado : esAmbitoDocumentacion()
+    Gestor -> Estado : esRecibidaYAceptada()
+    end
+
+    Gestor -> Gestor : getFechaYHoraActual()
+    Gestor -> Gestor :getEmpleadoLogueado()
+    Gestor -> Empleado : getDatosEmpleado()
+
+    Gestor -> Gestor : recibirYAceptarDoc()
+    Gestor -> SeleccBolsin : recibirYAceptarDoc()
+
+    ' Actualizar todos los remitos del bolsín
+    loop Para todos los remitos del bolsín
+        SeleccBolsin -> Remito : actualizarEstadoDoc()
+
+        ' Actualizar la documentación de cada remito
+        Remito -> Detalle : actualizarEstadoDoc()
+        Detalle -> Doc : marcarRecibidaYAceptada()
+
+        activate Doc
+        Doc -> Doc : getEstadoActual()
+
+
+        Doc -> CambEstDoc : sosActual()
+        'CambEstDoc --> Doc : cambioEstadoActual
+
+        Doc -> CambEstDoc : setFechaHoraFin(fechaActual)
+
+        create NuevoCED
+        Doc -> NuevoCED : new()
+
+        'Estado --> Doc : estadoRecibidaAceptada
+
+        'Doc --> Detalle : documentación actualizada
+
+        deactivate Doc
+
+        'Detalle --> Remito : documentación actualizada
+
+        'Remito --> Bolsin : remito actualizado
+
+        deactivate Remito
+    end
+
+    deactivate Bolsin
 end
-
-Gestor -> Gestor : RecibirYAceptarRemitos()
-Gestor -> SeleccBolsin : RecibirYAceptarRemitos()
-
-
-
-
-Gestor -> Gestor : buscarEstadoRecibidaYAceptada()
-Gestor -> Estado : esAmbitoDocumentacion()
-Gestor -> Estado : esRecibidaYAceptada()
-
-Gestor -> Gestor : getFechaYHoraActual()
-Gestor -> Gestor :getEmpleadoLogueado()
-Gestor -> Empleado : getDatosEmpleado()
-
-Gestor -> Gestor : recibirYAceptarDoc()
-Gestor -> SeleccBolsin : recibirYAceptarDoc()
-
-' Actualizar todos los remitos del bolsín
-loop Para todos los remitos del bolsín
-    SeleccBolsin -> Remito : actualizarEstadoDoc()
-
-    ' Actualizar la documentación de cada remito
-    Remito -> Detalle : actualizarEstadoDoc()
-    Detalle -> Doc : marcarRecibidaYAceptada()
-
-    activate Doc
-    Doc -> Doc : getEstadoActual()
-
-
-    Doc -> CambEstDoc : sosActual()
-    'CambEstDoc --> Doc : cambioEstadoActual
-
-    Doc -> CambEstDoc : setFechaHoraFin(fechaActual)
-
-    create NuevoCED
-    Doc -> NuevoCED : new()
-
-    'Estado --> Doc : estadoRecibidaAceptada
-
-    'Doc --> Detalle : documentación actualizada
-
-    deactivate Doc
-
-    'Detalle --> Remito : documentación actualizada
-
-    'Remito --> Bolsin : remito actualizado
-
-    deactivate Remito
-end
-
-deactivate Bolsin
-
 ' Caso de uso incluido
 Gestor -> Gestor : llamarACUNotificarRecepcionBolsin()
 Gestor -> CU29 : <<include>> CU29 Notificar recepción Bolsín
