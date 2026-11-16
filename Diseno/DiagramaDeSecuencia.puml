@@ -13,10 +13,18 @@ entity "actual:Sesion" as Sesion
 entity "usuario:Usuario" as Usuario
 entity "empleados:Empleado" as Empleados
 entity "logueado:Empleado" as Empleado
-entity "cm:ComisionMedica" as CM
+entity "cmEmpleado:ComisionMedica" as CMEmpleado
 
 entity "bolsin:Bolsin" as Bolsin
-entity "ceBolsin:CambioEstadoBolsin" as CEB
+entity "seleccBolsin:Bolsin" as SeleccBolsin
+
+entity "cmOrigenBolsin:ComisionMedica" as CMBolsin
+
+entity ":CambioEstadoBolsin" as CEBolsin
+entity "actual:CambioEstadoBolsin" as ActualCEBolsin
+entity "RecibidoEnCMDestino:CambioEstadoBolsin" as RecibidoEnCMDestino
+
+
 entity "estado:Estado" as Estado
 
 entity "remito:Remito" as Remito
@@ -50,7 +58,7 @@ Gestor -> Empleado : getCM() : CM
 
 'Empleado --> Gestor : cm
 
-Gestor -> CM : getNombre()
+Gestor -> CMEmpleado : getNombre()
 'CM --> Gestor : nombreCM
 
 Gestor --> Pantalla : mostrarCM(nombreCM)
@@ -64,101 +72,107 @@ loop Para todos los bolsines encontrados
 
     Gestor -> Bolsin : sosEnviado()
     Bolsin -> Bolsin : obtenerEstadoActual()
-    Bolsin -> CEB : sosActual()
-    CEB --> Bolsin : cambioActual
-    Bolsin -> Estado : sosEnviado()
+    Bolsin -> CEBolsin : sosActual()
+    'CEBolsin --> Bolsin : cambioActual
+    Bolsin -> ActualCEBolsin : sosEnviado()
+    ActualCEBolsin -> Estado : esEnviado()
     'Estado --> Bolsin : resultado
     'Bolsin --> Gestor : resultado
 
     Gestor -> Bolsin : getCMOrigen()
+    Gestor -> CMBolsin : getNombre()
     'Bolsin --> Gestor : cmOrigen
 
     Gestor -> Bolsin : getNumeroPrecinto()
     'Bolsin --> Gestor : numeroPrecinto
 end
 
-Gestor --> Pantalla : mostrarListaBolsines()
+Gestor -> Pantalla : mostrarListadoBolsines()
 
-Responsable -> Pantalla : tomarSeleccionBolsin()
-Pantalla -> Gestor : tomarSeleccionBolsin()
+Responsable -> Pantalla : tomarSeleccBolsin()
+Pantalla -> Gestor : tomarSeleccBolsin()
 
 ' Buscar remitos y documentación del bolsín seleccionado
 Gestor -> Gestor : buscarRemitosBolsin()
-Gestor -> Bolsin : obtenerInformacionRemito()
+Gestor -> SeleccBolsin : obtenerInformacionRemito()
 'Bolsin --> Gestor : remitos
 
 loop Para todos los remitos del bolsín
-    Gestor -> Remito : getNumero()
+    SeleccBolsin -> Remito : getNumero()
     'Remito --> Gestor : numeroRemito
 
-    Gestor -> Remito : getDatosDocumentacion()
+    SeleccBolsin -> Remito : getDatosDocumentacion()
     'Remito --> Gestor : detalles
 
     loop Para todos los detalles del remito
-        Gestor -> Detalle : getDocumentacion()
+        Remito -> Detalle : getDocumentacion()
         'Detalle --> Gestor : documentacion
 
-        Gestor -> Doc : getAsunto()
+        Detalle -> Doc : getAsunto()
         'Doc --> Gestor : asunto
 
-        Gestor -> Doc : getTipoDocumento()
+        Detalle -> Doc : getTipoDocumento()
         'Doc --> Gestor : tipoDocumento
 
-        Gestor -> TipoDoc : getNombre()
+        Doc -> TipoDoc : getNombre()
         'TipoDoc --> Gestor : nombreTipoDocumento
     end
 end
 
-Gestor --> Pantalla : mostrarDatosRemitos()
-Gestor --> Pantalla : mostrarOpcionesRecepcionBolsin()
+Gestor -> Pantalla : mostrarDatosRemitos()
+Gestor -> Pantalla : mostrarOpcRecepcionBolsin()
 
-Responsable -> Pantalla : tomarSeleccionOpcionRecepcion()
-Pantalla -> Gestor : tomarSeleccionOpcionRecepcion()
+Responsable -> Pantalla : tomarSeleccOpcionRecepcion()
+Pantalla -> Gestor : tomarSeleccOpcionRecepcion()
 
-Gestor --> Pantalla : solicitarConfirmacion()
+Gestor -> Pantalla : solicitarConfirmacion()
 
 Responsable -> Pantalla : tomarConfirmacion()
 Pantalla -> Gestor : tomarConfirmacion()
 
 ' Validar que el bolsín corresponde a la recepción
 Gestor -> Gestor : buscarEstadoRecibidoCMDestino()
+loop Buscar estado Recibido en CM Destino
+    Gestor -> Estado : esAmbitoBolsin()
+    Gestor -> Estado : esRecibidoEnCMDestino()
 
-Gestor -> Bolsin : esTuCMDestino(cm)
-Bolsin --> Gestor : resultado
+end 
 
-Gestor -> Bolsin : sosEnviado()
-Bolsin --> Gestor : resultado
+Gestor -> Gestor : getFechaActual()
+'Sesion --> Gestor : fechaActual
 
-Gestor -> Sesion : getFechaActual()
-Sesion --> Gestor : fechaActual
-
-Gestor -> Sesion : getEmpleadoLogueado()
-Sesion --> Gestor : empleado
+Gestor -> Gestor : getEmpleadoLogueado()
+'Sesion --> Gestor : empleado
 
 Gestor -> Empleado : getDatosEmpleado()
-Empleado --> Gestor : datosEmpleado
+'Empleado --> Gestor : datosEmpleado
+Gestor -> Gestor : recibirBolsinCMDestino()
 
 ' Registrar recepción del bolsín
-Gestor -> Bolsin : recibirBolsin()
+Gestor -> SeleccBolsin : recibirBolsin()
 
-activate Bolsin
+activate SeleccBolsin
 
-Bolsin -> Bolsin : obtenerEstadoActual()
-Bolsin -> CEB : sosActual()
-CEB --> Bolsin : cambioEstadoActual
+SeleccBolsin -> SeleccBolsin : obtenerEstadoActual()
+SeleccBolsin -> ActualCEBolsin : setFechaHoraFin()
+SeleccBolsin -> SeleccBolsin : crearCambioDeEstado()
 
-Bolsin -> CEB : setFechaHoraFin(fechaActual)
+create RecibidoEnCMDestino
+SeleccBolsin --> RecibidoEnCMDestino : new()
+Gestor -> Gestor : buscarEstadoRecibidoYAceptado()
+loop 
+    Gestor -> Estado : esAmbitoRemito()
+    Gestor -> Estado : esRecibidoYAceptado()
 
-create CEB
-Bolsin -> CEB : new()
-Bolsin -> Estado : buscarEstadoRecibidoCMDestino()
-Estado --> Bolsin : estadoRecibido
-Bolsin -> CEB : setEstado(estadoRecibido)
-Bolsin -> CEB : setResponsableCE(empleado)
+end
+
+Gestor -> Gestor : RecibirYAceptarRemitos()
+Gestor -> SeleccBolsin : RecibirYAceptarRemitos()
+
 
 ' Actualizar todos los remitos del bolsín
 loop Para todos los remitos del bolsín
-    Bolsin -> Remito : recibirYAceptarRemito()
+    SeleccBolsin -> Remito : recibirYAceptarRemito()
 
     activate Remito
 
