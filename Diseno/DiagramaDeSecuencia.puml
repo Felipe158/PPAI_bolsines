@@ -6,12 +6,13 @@ title Realización de CU28 - Registrar recepción de bolsín
 autonumber
 
 actor "Encargado de bolsines" as Responsable
-boundary "pantalla:InterfazPantallaRecepcionBolsin" as Pantalla
+boundary "pantalla:PantallaRecepcionBolsin" as Pantalla
 control "gestor:GestorRecepcionBolsin" as Gestor
 
-entity "sesion:Sesion" as Sesion
+entity "actual:Sesion" as Sesion
 entity "usuario:Usuario" as Usuario
-entity "empleado:Empleado" as Empleado
+entity "empleados:Empleado" as Empleados
+entity "logueado:Empleado" as Empleado
 entity "cm:ComisionMedica" as CM
 
 entity "bolsin:Bolsin" as Bolsin
@@ -26,11 +27,11 @@ entity "ceDocumentacion:CambioEstadoDocumentacion" as CED
 
 
 create Pantalla
-Responsable --> Pantalla : registrarRecepcion()
+Responsable --> Pantalla : opcregistrarRecepcionBolsin()
 Pantalla -> Pantalla : habilitarPantalla()
 
 create Gestor
-Pantalla --> Gestor : iniciarCU()
+Pantalla --> Gestor : opcregistrarRecepcionBolsin()
 
 activate Gestor
 
@@ -41,7 +42,8 @@ Gestor -> Gestor : getEmpleadoLogueado()
 Gestor -> Sesion : getUsuario()
 'Sesion --> Gestor : usuario
 
-Gestor -> Usuario : sosTuUsuario(empleado)
+Gestor -> Empleados : *esTuUsuario(empleado)
+
 'Usuario --> Gestor : empleado
 
 Gestor -> Empleado : getCM() : CM
@@ -77,7 +79,7 @@ end
 
 Gestor --> Pantalla : mostrarListaBolsines()
 
-Actor -> Pantalla : tomarSeleccionBolsin()
+Responsable -> Pantalla : tomarSeleccionBolsin()
 Pantalla -> Gestor : tomarSeleccionBolsin()
 
 ' Buscar remitos y documentación del bolsín seleccionado
@@ -110,12 +112,12 @@ end
 Gestor --> Pantalla : mostrarDatosRemitos()
 Gestor --> Pantalla : mostrarOpcionesRecepcionBolsin()
 
-Actor -> Pantalla : tomarSeleccionOpcionRecepcion()
+Responsable -> Pantalla : tomarSeleccionOpcionRecepcion()
 Pantalla -> Gestor : tomarSeleccionOpcionRecepcion()
 
 Gestor --> Pantalla : solicitarConfirmacion()
 
-Actor -> Pantalla : tomarConfirmacion()
+Responsable -> Pantalla : tomarConfirmacion()
 Pantalla -> Gestor : tomarConfirmacion()
 
 ' Validar que el bolsín corresponde a la recepción
@@ -201,7 +203,7 @@ deactivate Bolsin
 Gestor -> Gestor : llamarACUNotificarRecepcionBolsin()
 Gestor -> Actor : <<include>> CU29 Notificar recepción Bolsín
 
-Gestor --> Pantalla : informarResultado()
+Gestor --> Pantalla : mostrarNotificacionExito()
 Gestor -> Gestor : finCU()
 
 deactivate Gestor
