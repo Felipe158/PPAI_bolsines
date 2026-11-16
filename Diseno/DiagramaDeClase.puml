@@ -317,7 +317,7 @@ class GestorRecepcionBolsin {
 ' INTERFAZ
 '========================================
 
-class InterfazPantallaRecepcionBolsin {
+class PantallaRecepcionBolsin {
     + buscarBolsines(): void
     + iniciarCU(): void
     + recibirSeleccion(): void
@@ -343,8 +343,8 @@ Sesion --> "1" Usuario : usuario
 
 ' Ubicacion
 
-Provincia "1" <-- "0..*" Localidad : provincia
-Localidad "1" <-- "0..*" ComisionMedica : localidad
+Provincia "1" <-- Localidad : provincia
+Localidad "1" <-- ComisionMedica : localidad
 
 ' Empleado 
 
@@ -354,7 +354,7 @@ Empleado --> "1" Usuario : usuario
 ' Documentacion
 
 Documentacion --> "1" TipoDocumento : tipoDocumento
-Documentacion *-- "1..*" Archivo : archivoAdjunto
+Documentacion --> "1..*" Archivo : archivoAdjunto
 Documentacion --> "1" ComisionMedica : cmOrigen
 Documentacion --> "1..*" CambioEstadoDocumentacion : cambiosEstado
 
@@ -363,22 +363,22 @@ CambioEstadoDocumentacion --> "1" Empleado : responsableCE
 
 ' Remitos
 
-Remito "1" *-- "1..*" DetalleDeRemito : detalles
-DetalleDeRemito "*" --> "1" Documentacion : documentacion
+Remito *-- "1..*" DetalleDeRemito : detalleRemito
+DetalleDeRemito --> "1" Documentacion : documentacion
 
-Remito "*" --> "1" Estado : estado
+Remito --> "1" Estado : estado
 Remito --> "1" ComisionMedica : origen
 Remito --> "1" ComisionMedica : destino
 
 ' Bolsines
 
-Bolsin "1" *-- "1..*" Remito : remitos
+Bolsin *-- "1..*" Remito : remitos
 Bolsin --> "1" ComisionMedica : origen
 Bolsin --> "1" ComisionMedica : destino
-Bolsin "1" *-- "1..*" CambioEstadoBolsin : cambiosEstado
+Bolsin --> "1..*" CambioEstadoBolsin : cambiosEstado
 
-CambioEstadoBolsin "*" --> "1" Estado : estado
-CambioEstadoBolsin "*" --> "1" Empleado : responsableCE
+CambioEstadoBolsin --> "1" Estado : estado
+CambioEstadoBolsin --> "1" Empleado : responsableCE
 
 ' Gestor y entidades utilizadas. DEPENDENCIAS
 
@@ -392,9 +392,10 @@ GestorRecepcionBolsin ..> Estado
 GestorRecepcionBolsin ..> CambioEstadoBolsin
 GestorRecepcionBolsin ..> CambioEstadoDocumentacion
 GestorRecepcionBolsin ..> ComisionMedica
+GestorRecepcionBolsin ..> PantallaRecepcionBolsin
 
 ' Interfaz y gestor
 
-InterfazPantallaRecepcionBolsin ..> GestorRecepcionBolsin
+PantallaRecepcionBolsin ..> GestorRecepcionBolsin
 
 @enduml
