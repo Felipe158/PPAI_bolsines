@@ -304,6 +304,7 @@ class GestorRecepcionBolsin {
     + iniciarCU(): void
     + getCM(): ComisionMedica
     + getFechaActual(): DateTime
+    + getEmpleadoLogueado(): Empleado
     + iniciarCURegistrarRecepcionBolsin(): void
     + recibirAceptarBolsin(): void
     + recibirAceptarDocumentacion(): void
@@ -311,6 +312,7 @@ class GestorRecepcionBolsin {
     + recibirDerivarDocumentacion(): void
     + tomarConfirmacion(): void
     + tomarSeleccionOpcionRecepcion(): void
+    
 }
 
 '========================================
