@@ -61,7 +61,8 @@ class Empleado {
     - apellido: string
     - nombre: string
     --
-    + esTuUsuario(): Boolean
+    + esTuUsuario(usuario:Usuario): Boolean
+    + getDatosEmpleado(): String
     + getApellido(): string
     + getCM(): ComisionMedica
     + getNombre(): string
@@ -102,10 +103,10 @@ class ComisionMedica {
     - nombre: string
     - telefono: string
     --
+    + getNombre(): string
     + getCodigo(): int
     + getDireccion(): string
     + getEmail(): string
-    + getNombre(): string
     + getTelefono(): string
     + setCodigo(): void
     + setDireccion(): void
@@ -144,19 +145,18 @@ class Documentacion {
     - fechaPase: DateTime
     - numero: int
     --
-    + crearCE(): void
-    + darDeBaja(): void
     + getAsunto(): string
-    + getDatosDocumentacion(): void
+    + getTipoDocumento(): TipoDocumento
+    + marcarRecibidaYAceptada(estado:Estado, f:Datetime, responsable:Empleado): void
+    + getEstadoActual(): void
+    + darDeBaja(): void
     + getEstado(): Estado
     + getFechaPase(): DateTime
     + getNumero(): int
-    + getTipoDocumento(): TipoDocumento
     + marcarEnBolsinSaliente(): void
     + marcarEnBolsinEnviado(): void
     + marcarEnRemito(): void
     + marcarParaRedirigir(): void
-    + marcarRecibidaAceptada(): void
     + marcarRecibidaRechazada(): void
     + marcarNoRecibida(): void
     + reenviar(): void
@@ -172,12 +172,14 @@ class Documentacion {
 class CambioEstadoDocumentacion {
     - fechaHoraFin: DateTime
     - fechaHoraInicio: DateTime
+    - respondable: Empleado
     --
     + getFechaHoraFin(): DateTime
     + getFechaHoraInicio(): DateTime
-    + setFechaHoraFin(): void
-    + setFechaHoraInicio(): void
+    + setFechaHoraFin(fechaFin:Datetime): void
+    + setFechaHoraInicio(fechaInicio:Datetime): void
     + sosActual(): Boolean
+    + new(estado:Estado, f:Datetime, responsable:Empleado): CambioEstadoDocumentacion
 }
 
 '========================================
@@ -196,9 +198,6 @@ class Estado {
     + esRecibidaYAceptada(): Boolean
     + esRecibidoEnCMDestino(): Boolean
     + esRecibidoYAceptado(): Boolean
-    + esEstadoBolsin(): Boolean
-    + esEstadoDocumentacion(): Boolean
-    + esEstadoRemito(): Boolean
     + getAmbito(): string
     + getDescripcion(): string
     + getNombre(): string
@@ -216,16 +215,16 @@ class Remito {
     - fecha: DateTime
     - numero: int
     --
-    + actualizarEstadoDoc(): void
-    + buscarDocumentacion(): void
-    + estasGenerado(): Boolean
+    + getNumero(): int
     + getDatosDocumentacion(): string
+    + recibirYAceptar(estado:Estado): void
+    + setEstado(estado:Estado): void
+    + actualizarEstadoDoc(estado:Estado, f:Datetime, responsable:String): void
+    + estasGenerado(): Boolean
     + getDatosRemito(): void
     + getFecha(): DateTime
-    + getNumero(): int
     + modificarDocumentacionIncluida(): void
     + new(): void
-    + recibirDocumentacion(): void
     + setEstado(): void
     + setFecha(): void
     + setNumero(): void
@@ -238,7 +237,7 @@ class DetalleDeRemito {
     - areaCMDestino: int
     --
     + aceptarDocumentacion(): void
-    + actualizarEstadoDoc(): void
+    + actualizarEstadoDoc(estado:Estado, f:Datetime, responsable:String) : void
     + getDocumentacion(): Documentacion
     + setAreaCMDestino(): void
 }
@@ -253,30 +252,33 @@ class Bolsin {
     - numeroPrecinto: int
     - peso: double
     --
-    + asociarRemito(): void
-    + crearCEBolsin(): void
-    + esTuCMOrigen(): Boolean
-    + getNroPrecinto(): int
-    + getNumeroBolsin(): int
-    + mostrarDatos(): void
-    + new(): void
-    + obtenerCMDestino(): ComisionMedica
-    + obtenerInformacionRemito(): void
-    + setDetalleBolsin(): void
-    + setEstado(): void
+    + esTuCMDestino(cm:ComisionMedica) : Boolean
     + sosEnviado(): Boolean
+    + obtenerEstadoActual(): Estado
+    + getCMOrigen(): ComisionMedica
+    + getNumeroPrecinto(): int
+    + obtenerInformacionRemito(): void
+    + recibirBolsin(estado:Estado, f:Datetime, responsable:String): void
+    + obtenerEstadoActual(): Estado
+    + crearCambioDeEstado(estado:Estado, f:Datetime, responsable:String): void
+    + RecibirYAceptarRemitos(estado:Estado): void
+    + recibirYAceptarDoc(estado:Estado, f:Datetime, responsable:String) : void
+    
 }
 
 class CambioEstadoBolsin {
     - fechaHoraFin: DateTime
     - fechaHoraInicio: DateTime
+    - estado: Estado
+    - respondable: Empleado
     --
     + getFechaHoraFin(): DateTime
     + getFechaHoraInicio(): DateTime
-    + setFechaHoraFin(): void
-    + setFechaHoraInicio(): void
+    + setFechaHoraFin(fechaHoraFin: DateTime): void
+    + setFechaHoraInicio(fechaHoraInicio: DateTime): void
     + sosActual(): Boolean
     + sosEnviado(): Boolean
+    + new(estado:Estado, f:Datetime, responsable:Empleado)
 }
 
 '========================================
@@ -288,30 +290,38 @@ class GestorRecepcionBolsin {
     - cambioEstadoDocumentacion: CambioEstadoDocumentacion
     - detalleRemito: DetalleDeRemito
     - documentacion: Documentacion
-    - empleado: Empleado
-    - estado: Estado
-    - remito: Remito
+    - empleado: Empleado[]
+    - estado: Estado[]
+    - remito: Remito[]
     - sesion: Sesion
     - usuario: Usuario
+    - nombreCM: String
+    - fechaActual: Datetime
+    - cm: ComisionMedica
+    - nroPrecinto: Int
+    - seleccBolsin: Bolsin
+    - empleadoLogueado: Empleado
+    - recibidoEnCMDestino: Estado
+    - recibidaYAceptada: Estado
+    - recibidoYAceptado: Estado
+    
     --
-    + buscarBolsinesEnviados(): void
-    + buscarEstadoRecepcion(): void
-    + buscarEstadoDocumentacion(): void
-    + buscarEstadoBolsin(): void
-    + buscarRemitos(): void
-    + buscarDocumentacion(): void
-    + finCU(): void
-    + iniciarCU(): void
-    + getCM(): ComisionMedica
-    + getFechaActual(): DateTime
+    + opcregistrarRecepcionBolsin() : void
     + getEmpleadoLogueado(): Empleado
-    + iniciarCURegistrarRecepcionBolsin(): void
-    + recibirAceptarBolsin(): void
-    + recibirAceptarDocumentacion(): void
-    + recibirRechazarDocumentacion(): void
-    + recibirDerivarDocumentacion(): void
+    + buscarBolsinesEnviados() : Bolsin[]
+    + tomarSeleccBolsin() : void
+    + buscarRemitosBolsin(sleccBolsin:Bolsin) : Remito[]
+    + tomarSeleccOpcionRecepcion() : void
     + tomarConfirmacion(): void
-    + tomarSeleccionOpcionRecepcion(): void
+    + recibirBolsinCMDestino(): void
+    + buscarEstadoRecibidoCMDestino() : Estado
+    + getFechaActual(): DateTime
+    + buscarEstadoRecibidoYAceptado() : Estado
+    + buscarEstadoRecibidaYAceptada() : Estado
+    + RecibirYAceptarRemitos(estado:Estado) : void
+    + recibirYAceptarDoc(estado:Estado, f:Datetime, responsable:String) : void
+    + llamarACUNotificarRecepcionBolsin() : void
+    + finCU(): void
     
 }
 
@@ -320,18 +330,17 @@ class GestorRecepcionBolsin {
 '========================================
 
 class PantallaRecepcionBolsin {
-    + buscarBolsines(): void
-    + iniciarCU(): void
-    + recibirSeleccion(): void
-    + recibirConfirmacion(): void
-    + mostrarBolsines(): void
-    + mostrarDetalle(): void
-    + mostrarOpcionesRecepcion(): void
-    + mostrarConfirmacion(): void
-    + mostrarResultado(): void
-    + tomarComunicacion(): void
-    + tomarSeleccion(): void
-    + tomarSeleccionOpcion(): void
+    + opcregistrarRecepcionBolsin() : void
+    + mostrarCM(nombreCM:String) : void
+    + mostrarListadoBolsines(nombreCMOgigen:String, nroPrecinto:int) : void
+    + habilitarPantalla(): void
+    + mostrarOpcRecepcionBolsin(): void
+    + mostrarNotificacionExito() : void
+    + mostrarDatosRemitos(): void
+    + tomarSeleccBolsin(): void
+    + tomarSeleccionOpcionRecepcion(): void
+    + tomarConfirmacion(): void
+    + solicitarConfirmacion(): void
 }
 
 '========================================

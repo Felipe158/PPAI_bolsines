@@ -1,6 +1,6 @@
 
 @startuml
-
+scale max 3000*3000
 title Realización de CU28 - Registrar recepción de bolsín
 
 autonumber
@@ -10,7 +10,6 @@ boundary "pantalla\n:PantallaRecepcionBolsin" as Pantalla
 control "gestor\n:GestorRecepcionBolsin" as Gestor
 
 entity "actual\n:Sesion" as Sesion
-entity "usuario\n:Usuario" as Usuario
 entity ":Empleado" as Empleados
 entity "logueado\n:Empleado" as Empleado
 entity "cmEmpleado\n:ComisionMedica" as CMEmpleado
@@ -112,7 +111,7 @@ loop Para todos los remitos del bolsín
         Detalle -> Doc : getAsunto() : String
         'Doc --> Gestor : asunto
 
-        Detalle -> Doc : getTipoDocumento() : String
+        Detalle -> Doc : getTipoDocumento() : TipoDocumento
         'Doc --> Gestor : tipoDocumento
 
         Doc -> TipoDoc : getNombre() : String
