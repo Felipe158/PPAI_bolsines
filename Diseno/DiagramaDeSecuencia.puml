@@ -10,11 +10,11 @@ boundary "pantalla\n:PantallaRecepcionBolsin" as Pantalla
 control "gestor\n:GestorRecepcionBolsin" as Gestor
 
 entity "actual\n:Sesion" as Sesion
-entity ":Empleado" as Empleados
+entity ":Empleado" as Empleados #E8DAEF
 entity "logueado\n:Empleado" as Empleado
 entity "cmEmpleado\n:ComisionMedica" as CMEmpleado
 
-entity ":Bolsin" as Bolsin
+entity ":Bolsin" as Bolsin #E8DAEF
 entity "seleccBolsin:Bolsin" as SeleccBolsin
 
 entity "cmOrigenBolsin\n:ComisionMedica" as CMBolsin
@@ -26,11 +26,11 @@ entity "RecibidoEnCMDestino\n:CambioEstadoBolsin" as RecibidoEnCMDestino
 
 entity "estado:Estado" as Estado
 
-entity ":Remito" as Remito
-entity ":DetalleDeRemito" as Detalle
-entity ":Documentacion" as Doc
-entity ":TipoDocumento" as TipoDoc
-entity ":CambioEstadoDocumentacion" as CambEstDoc
+entity ":Remito" as Remito #E8DAEF
+entity ":DetalleDeRemito" as Detalle #E8DAEF
+entity ":Documentacion" as Doc #E8DAEF
+entity ":TipoDocumento" as TipoDoc #E8DAEF
+entity ":CambioEstadoDocumentacion" as CambEstDoc #E8DAEF
 entity "RecibidaYAceptada\n:CambioEstadoDocumentacion" as NuevoCED
 actor ":CU29" as CU29
 
@@ -210,7 +210,7 @@ loop Para todos los remitos del bolsin
         Doc -> CambEstDoc : setFechaHoraFin(fechaActual:Datetime) : void
 
         create NuevoCED
-        Doc -> NuevoCED : new(estado:Estado, f:Datetime, responsable:Empleado) : CambioEstadoDocumentacion
+        Doc --> NuevoCED : new(estado:Estado, f:Datetime, responsable:Empleado) : CambioEstadoDocumentacion
 
         'Estado --> Doc : estadoRecibidaAceptada
 
