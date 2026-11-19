@@ -62,7 +62,7 @@ Gestor -> Empleado : getCM() : ComisionMedica
 Gestor -> CMEmpleado : getNombre() : String
 'CM --> Gestor : nombreCM
 
-Gestor --> Pantalla : mostrarCM(nombreCM) : void
+Gestor --> Pantalla : mostrarCM(nombreCM:String) : void
 
 ' Buscar bolsines enviados a la CM
 Gestor -> Gestor : buscarBolsinesEnviados() : Bolsin[]
@@ -88,13 +88,13 @@ loop Para todos los bolsines
     'Bolsin --> Gestor : numeroPrecinto
 end
 
-Gestor -> Pantalla : mostrarListadoBolsines() : void
+Gestor -> Pantalla : mostrarListadoBolsines(nombreCMOgigen:String, nroPrecinto:int) : void
 
 Responsable -> Pantalla : tomarSeleccBolsin() : void
 Pantalla -> Gestor : tomarSeleccBolsin() : void
 
 ' Buscar remitos y documentación del bolsín seleccionado
-Gestor -> Gestor : buscarRemitosBolsin() : Remito[]
+Gestor -> Gestor : buscarRemitosBolsin(sleccBolsin:Bolsin) : Remito[]
 Gestor -> SeleccBolsin : obtenerInformacionRemito() : void
 'Bolsin --> Gestor : remitos
 
@@ -141,7 +141,7 @@ loop Para todos los estados. Buscar estado Bolsin Recibido en CM Destino
 
 end 
 
-Gestor -> Gestor : getFechaActual() : Date
+Gestor -> Gestor : getFechaActual() : Datetime
 'Sesion --> Gestor : fechaActual
 
 Gestor -> Gestor : getEmpleadoLogueado() : Empleado
@@ -153,21 +153,21 @@ Gestor -> Empleado : getDatosEmpleado() : String
 
 
 ' Registrar recepción del bolsín
-Gestor -> SeleccBolsin : recibirBolsin() : void
+Gestor -> SeleccBolsin : recibirBolsin(estado:Estado, f:Datetime, responsable:String) : void
 
 activate SeleccBolsin
 
 SeleccBolsin -> SeleccBolsin : obtenerEstadoActual() : Estado
-SeleccBolsin -> ActualCEBolsin : setFechaHoraFin() : void
-SeleccBolsin -> SeleccBolsin : crearCambioDeEstado() : void
+SeleccBolsin -> ActualCEBolsin : setFechaHoraFin(f:Datetime) : void
+SeleccBolsin -> SeleccBolsin : crearCambioDeEstado(estado:Estado, f:Datetime, responsable:String) : void
 
 create RecibidoEnCMDestino
-SeleccBolsin --> RecibidoEnCMDestino : new() : CambioEstadoBolsin
+SeleccBolsin --> RecibidoEnCMDestino : new(estado:Estado, f:Datetime, responsable:String) : CambioEstadoBolsin
+
 Gestor -> Gestor : buscarEstadoRecibidoYAceptado() : Estado
 loop Para todos los estados. Buscar estado Remito Recibido y Aceptado
     Gestor -> Estado : esAmbitoRemito() : Boolean
     Gestor -> Estado : esRecibidoYAceptado() : Boolean
-
 end
 
 Gestor -> Gestor : buscarEstadoRecibidaYAceptada() : Estado
@@ -177,33 +177,29 @@ loop Para todos los estados. Buscar estado Documentacion Recibida y Aceptada
 end
 
 
-Gestor -> Gestor : RecibirYAceptarRemitos() : void
+Gestor -> Gestor : RecibirYAceptarRemitos(estado:Estado) : void
 
 loop Para todos los remitos del bolsin
-
-    
-    Gestor -> SeleccBolsin : RecibirYAceptarRemitos() : void
-    SeleccBolsin -> Remito : recibirYAceptar() : void
-    Remito -> Remito : setEstado() : void
-
-
+    Gestor -> SeleccBolsin : RecibirYAceptarRemitos(estado:Estado) : void
+    SeleccBolsin -> Remito : recibirYAceptar(estado:Estado) : void
+    Remito -> Remito : setEstado(estado:Estado) : void
 
     Gestor -> Gestor : getFechaActual() : DateTime
     Gestor -> Gestor :getEmpleadoLogueado() : Empleado
     Gestor -> Empleado : getDatosEmpleado() : String
 
-    Gestor -> Gestor : recibirYAceptarDoc() : void
-    Gestor -> SeleccBolsin : recibirYAceptarDoc() : void
+    Gestor -> Gestor : recibirYAceptarDoc(estado:Estado, f:Datetime, responsable:String) : void
+    Gestor -> SeleccBolsin : recibirYAceptarDoc(estado:Estado, f:Datetime, responsable:String) : void
 
 
-    SeleccBolsin -> Remito : actualizarEstadoDoc() : void
+    SeleccBolsin -> Remito : actualizarEstadoDoc(estado:Estado, f:Datetime, responsable:String) : void
 
     ' Actualizar todos los remitos del bolsín
     loop Para todos los Documentos asociados al Remito
         
         ' Actualizar la documentación de cada remito
-        Remito -> Detalle : actualizarEstadoDoc() : void
-        Detalle -> Doc : marcarRecibidaYAceptada() : void
+        Remito -> Detalle : actualizarEstadoDoc(estado:Estado, f:Datetime, responsable:String) : void
+        Detalle -> Doc : marcarRecibidaYAceptada(estado:Estado, f:Datetime, responsable:String) : void
 
         activate Doc
         Doc -> Doc : getEstadoActual() : void
@@ -212,10 +208,10 @@ loop Para todos los remitos del bolsin
         Doc -> CambEstDoc : sosActual() : Boolean
         'CambEstDoc --> Doc : cambioEstadoActual
 
-        Doc -> CambEstDoc : setFechaHoraFin(fechaActual) : void
+        Doc -> CambEstDoc : setFechaHoraFin(fechaActual:Datetime) : void
 
         create NuevoCED
-        Doc -> NuevoCED : new() : CambioEstadoDocumentacion
+        Doc -> NuevoCED : new(estado:Estado, f:Datetime, responsable:String) : CambioEstadoDocumentacion
 
         'Estado --> Doc : estadoRecibidaAceptada
 
